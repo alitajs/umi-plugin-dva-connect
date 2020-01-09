@@ -22,7 +22,7 @@ Configure in `.umirc.js`,
 
 ```js
 export default {
-  plugins: [['umi-plugin-plugin-dva-connect', options]],
+  plugins: [['umi-plugin-dva-connect', options]],
 };
 ```
 
