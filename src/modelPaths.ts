@@ -6,10 +6,33 @@ const fsStat = promisify(fs.stat);
 const fsReaddir = promisify(fs.readdir);
 const NodeGreaterThanXX = nodeGreaterThanXX();
 
-export default async function findModels(absSrcPath: string, singular: boolean) {
-  const modelDirname = singular ? 'model' : 'models';
-  const globalModelsTask = findTypeScriptFilesRecursively(join(absSrcPath, modelDirname));
-  return [...(await globalModelsTask)];
+export default class ModelPaths {
+  paths: Set<string> = new Set();
+
+  private absSrcPath: string;
+
+  private singular: boolean = false;
+
+  constructor(absSrcPath: string, singular: boolean = false) {
+    this.absSrcPath = absSrcPath;
+    this.singular = singular;
+    this.updatePaths();
+  }
+
+  setSingular(singular: boolean = false): Promise<boolean> {
+    if (this.singular === !!singular) return Promise.resolve(false);
+    this.singular = !!singular;
+    return this.updatePaths();
+  }
+
+  async updatePaths() {
+    const modelDirname = this.singular ? 'model' : 'models';
+    const globalModelsTask = findTypeScriptFilesRecursively(join(this.absSrcPath, modelDirname));
+    const nextPaths = [...(await globalModelsTask)];
+    const hasUpdated = nextPaths.some(path => !this.paths.has(path));
+    this.paths = new Set(nextPaths);
+    return hasUpdated;
+  }
 }
 
 async function findTypeScriptFilesRecursively(specPath: string): Promise<string[]> {
@@ -39,7 +62,7 @@ async function groupAbsFilesPathsInSpecificPath(specPath: string) {
   return grouped;
 }
 
-function nodeGreaterThanXX() {
+function nodeGreaterThanXX(): boolean {
   const [major, minor] = process.version.match(/(\d*)\.(\d*)\.(\d*)/).slice(1);
   if (parseInt(major) > 10) return true;
   return major === '10' && parseInt(minor) >= 10;
