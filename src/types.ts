@@ -5,6 +5,12 @@ export interface PluginDvaConnectOptions {
    * true
    */
   loading?: boolean;
+  /**
+   * name directory in singular.
+   * @default
+   * false
+   */
+  singular?: boolean;
 }
 
 export type PickDvaModelState<T> = T extends { namespace: infer U; state: infer V }
