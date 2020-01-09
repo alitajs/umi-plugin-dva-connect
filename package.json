@@ -1,0 +1,44 @@
+{
+  "name": "umi-plugin-dva-connect",
+  "license": "MIT",
+  "version": "0.0.1",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "typings": "lib/index.d.ts",
+  "repository": "alitajs/plugin-dva-connect",
+  "description": "generate the types definitions of dvajs models automatically",
+  "scripts": {
+    "build": "father-build",
+    "prettier": "prettier -c --write \"**/*\"",
+    "start": "cross-env APP_ROOT=$PWD/example umi dev",
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
+    "lint:fix": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint:fix && npm run prettier && git add ."
+    }
+  },
+  "authors": {
+    "name": "imhele",
+    "email": "work@imhele.com"
+  },
+  "peerDependencies": {
+    "umi": "2.x || ^2.9.0",
+    "umi-plugin-react": "1.x || ^1.0.0"
+  },
+  "devDependencies": {
+    "@umijs/fabric": "^2.0.0",
+    "cross-env": "^6.0.3",
+    "father-build": "^1.8.0",
+    "husky": "^4.0.3",
+    "np": "^5.0.3",
+    "umi": "^2.9.0",
+    "umi-plugin-react": "^1.14.12",
+    "umi-types": ">= 0.4.0-beta.4"
+  },
+  "files": [
+    "lib",
+    "src"
+  ]
+}
