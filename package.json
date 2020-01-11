@@ -9,6 +9,7 @@
   "description": "generate the types definitions of dvajs models automatically",
   "scripts": {
     "build": "father-build",
+    "dev": "npm run build && npm run start",
     "prettier": "prettier -c --write \"**/*\"",
     "start": "cross-env APP_ROOT=$PWD/example umi dev",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",

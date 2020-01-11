@@ -15,7 +15,7 @@ export default function pluginDvaConnect(api: IApi, initialOptions: OptionsType 
     // async singular(next) {},
   });
 
-  // api.onDevCompileDone(regenerateDvaTypes);
+  api.onDevCompileDone(regenerateDvaTypes);
 
   api.onGenerateFiles(regenerateDvaTypes);
 
@@ -28,7 +28,7 @@ export default function pluginDvaConnect(api: IApi, initialOptions: OptionsType 
     },
   ]);
 
-  async function regenerateDvaTypes() {
+  function regenerateDvaTypes() {
     generator.setModelsPaths([]);
   }
 }
