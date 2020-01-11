@@ -1,24 +1,25 @@
 import { IApi } from 'umi-types';
-import { PluginDvaConnectOptions } from './types';
+import { PluginDvaConnectOptions as OptionsType } from './types';
 
 import DvaTypesGenerator from './generator';
-import ModelPaths from './modelPaths';
+import createOptions from './options';
 
 export * from './modelTypes';
 export * from './types';
 
-export default function pluginDvaConnect(api: IApi, options: PluginDvaConnectOptions = {}) {
+export default function pluginDvaConnect(api: IApi, initialOptions: OptionsType = {}) {
   const generator = new DvaTypesGenerator(api);
-  const modelPaths = new ModelPaths(api.paths.absSrcPath, options.singular);
 
-  api.onDevCompileDone(regenDvaTypes);
-
-  api.onOptionChange(async (nextOptions: PluginDvaConnectOptions = {}) => {
-    Object.assign(options, nextOptions);
-    if (await modelPaths.setSingular(options.singular)) {
-      regenDvaTypes();
-    }
+  const options = createOptions(initialOptions, {
+    // async loading(next) {},
+    // async singular(next) {},
   });
+
+  // api.onDevCompileDone(regenerateDvaTypes);
+
+  api.onGenerateFiles(regenerateDvaTypes);
+
+  api.onOptionChange((nextOptions: OptionsType = {}) => Object.assign(options, nextOptions));
 
   api.addUmiExports([
     {
@@ -27,7 +28,7 @@ export default function pluginDvaConnect(api: IApi, options: PluginDvaConnectOpt
     },
   ]);
 
-  async function regenDvaTypes() {
-    generator.updateModelsPaths(modelPaths.paths);
+  async function regenerateDvaTypes() {
+    generator.setModelsPaths([]);
   }
 }

@@ -5,11 +5,14 @@ export default class DvaTypesGenerator {
 
   paths: Set<string> = new Set();
 
+  private generating: boolean = false;
+
   constructor(api: IApi) {
     this.api = api;
   }
 
-  updateModelsPaths(paths: string[] | Set<string>) {
+  setModelsPaths(paths: string[] | Set<string>) {
+    if (this.generating) return;
     this.paths = new Set(paths);
   }
 }
