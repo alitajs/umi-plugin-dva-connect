@@ -1,5 +1,4 @@
-export default [
-  {
-    cjs: 'babel',
-  },
-];
+export default {
+  cjs: 'babel',
+  target: 'node',
+};

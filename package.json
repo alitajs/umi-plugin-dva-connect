@@ -3,8 +3,8 @@
   "license": "MIT",
   "version": "0.0.1",
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "typings": "lib/index.d.ts",
+  "types": "fixtures/index.ts",
+  "typings": "fixtures/index.ts",
   "repository": "alitajs/plugin-dva-connect",
   "description": "generate types definitions of dvajs models automatically",
   "scripts": {
@@ -14,6 +14,9 @@
     "start": "cross-env APP_ROOT=$PWD/example umi dev",
     "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src",
     "lint:fix": "eslint --fix --cache --ext .js,.jsx,.ts,.tsx --format=pretty ./src"
+  },
+  "browser": {
+    "lib/index.js": "fixtures/mocker.js"
   },
   "husky": {
     "hooks": {
@@ -41,6 +44,7 @@
   },
   "files": [
     "lib",
-    "src"
+    "src",
+    "fixtures"
   ]
 }

@@ -1,6 +1,7 @@
 .editorconfig
 .env
 .eslintcache
+.eslintignore
 .gitignore
 .prettierignore
 LICENSE

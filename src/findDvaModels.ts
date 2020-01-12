@@ -2,20 +2,52 @@ import fs from 'fs';
 import { join } from 'path';
 import { promisify } from 'util';
 
+import { UmiInternalRoute } from './types';
+
 /**
  * initialize promisified nodejs api
  */
 const fsStat = promisify(fs.stat);
+const fsExists = promisify(fs.exists);
 const fsReaddir = promisify(fs.readdir);
 const NodeGreaterThanXX = nodeGreaterThanXX();
 
-export default async function findDvaModelAbsPaths(
+export default async function findDvaModels(
   absSrcPath: string,
   singular: boolean,
+  routes: UmiInternalRoute[] = [],
 ): Promise<string[]> {
   const modelDir = singular ? 'model' : 'models';
-  const globalModelsTask = findTypeScriptFilesRecursively(join(absSrcPath, modelDir));
-  return [...(await globalModelsTask)];
+  const globalModelDir = join(absSrcPath, modelDir);
+
+  /** find pages models */
+  const pagesModelsTasks = routes.map(route => findDvaModelsInRoute(absSrcPath, modelDir, route));
+
+  /** there are no global models */
+  if (!(await fsExists(globalModelDir)) || !(await fsStat(globalModelDir)).isDirectory())
+    return (await Promise.all(pagesModelsTasks)).flat();
+
+  /** find global models */
+  const globalModelsTask = findTypeScriptFilesRecursively(globalModelDir);
+  return [await globalModelsTask, ...(await Promise.all(pagesModelsTasks))].flat();
+}
+
+async function findDvaModelsInRoute(
+  absSrcPath: string,
+  dir: string,
+  route: UmiInternalRoute = {},
+): Promise<string[]> {
+  const tasks: Promise<string[]>[] = [];
+
+  /** find models in the directory of component */
+  if (route.component && !route.component.startsWith('() =>'))
+    tasks.push(findTypeScriptFilesRecursively(join(absSrcPath, route.component, dir)));
+
+  /** find models in sub-routes */
+  if (route.routes?.length)
+    tasks.push(...route.routes.map(subRoute => findDvaModelsInRoute(absSrcPath, dir, subRoute)));
+  const paths = await Promise.all(tasks);
+  return paths.flat();
 }
 
 async function findTypeScriptFilesRecursively(specPath: string): Promise<string[]> {

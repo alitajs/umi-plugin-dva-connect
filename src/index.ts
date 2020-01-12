@@ -1,34 +1,39 @@
 import { IApi } from 'umi-types';
-import { PluginDvaConnectOptions as OptionsType } from './types';
 
 import DvaTypesGenerator from './generator';
-import createOptions from './options';
+import { PluginDvaConnectOptions as OptionsType } from './types';
 
-export * from './modelTypes';
+const DefaultPluginDvaConnectOptions: Required<OptionsType> = {
+  loading: true,
+  singular: false,
+};
+
 export * from './types';
 
 export default function pluginDvaConnect(api: IApi, initialOptions: OptionsType = {}) {
   const generator = new DvaTypesGenerator(api);
 
-  const options = createOptions(initialOptions, {
-    // async loading(next) {},
-    // async singular(next) {},
+  const options: Required<OptionsType> = {
+    ...DefaultPluginDvaConnectOptions,
+    ...initialOptions,
+  };
+
+  api.onDevCompileDone(() => generator.generate(options));
+
+  api.onGenerateFiles(() => generator.generate(options));
+
+  api.onOptionChange((nextOptions: OptionsType = {}) => {
+    generator.generate(Object.assign(options, nextOptions));
   });
-
-  api.onDevCompileDone(regenerateDvaTypes);
-
-  api.onGenerateFiles(regenerateDvaTypes);
-
-  api.onOptionChange((nextOptions: OptionsType = {}) => Object.assign(options, nextOptions));
 
   api.addUmiExports([
     {
       exportAll: true,
-      source: 'umi-plugin-dva-connect/lib/model-types',
+      source: 'umi-plugin-dva-connect/fixtures/index',
+    },
+    {
+      specifiers: [], // TODO
+      source: 'umi-plugin-dva-connect/fixtures/index',
     },
   ]);
-
-  function regenerateDvaTypes() {
-    generator.setModelsPaths([]);
-  }
 }
