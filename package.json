@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "typings": "lib/index.d.ts",
   "repository": "alitajs/plugin-dva-connect",
-  "description": "generate the types definitions of dvajs models automatically",
+  "description": "generate types definitions of dvajs models automatically",
   "scripts": {
     "build": "father-build",
     "dev": "npm run build && npm run start",

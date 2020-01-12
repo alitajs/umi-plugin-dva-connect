@@ -2,7 +2,7 @@
 
 [![NPM version](https://img.shields.io/npm/v/umi-plugin-dva-connect.svg?style=flat)](https://npmjs.org/package/umi-plugin-dva-connect) [![NPM downloads](http://img.shields.io/npm/dm/umi-plugin-dva-connect.svg?style=flat)](https://npmjs.org/package/umi-plugin-dva-connect)
 
-generate the types definitions of dvajs models automatically
+generate types definitions of dvajs models automatically
 
 ## Install
 
