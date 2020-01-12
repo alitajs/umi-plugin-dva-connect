@@ -30,7 +30,12 @@ export default class DvaTypesGenerator {
 
     /** check paths changed or not */
     if (previousPaths.length === this.paths.length)
-      if (!this.paths.some(path => !previousPaths.includes(path))) return false;
+      if (!this.paths.some(path => !previousPaths.includes(path))) {
+        this.generateTask = null;
+        return false;
+      }
+
+    this.generateTask = null;
     return true;
   }
 }

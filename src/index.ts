@@ -18,7 +18,7 @@ export default function pluginDvaConnect(api: IApi, initialOptions: OptionsType 
     ...initialOptions,
   };
 
-  api.onDevCompileDone(() => generator.generate(options));
+  // api.onDevCompileDone(() => generator.generate(options));
 
   api.onGenerateFiles(() => generator.generate(options));
 
