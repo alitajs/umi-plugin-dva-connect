@@ -48,7 +48,7 @@ interface ExampleModel = {
   namespace: 'example';
   state: {
     count: number;
-  },
+  };
 };
 
 const exampleModel: ExampleModel = {
