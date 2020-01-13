@@ -55,8 +55,8 @@ export default class DvaTypesGenerator {
       const fileContent = `\
 import { PickDvaModelState } from './utils';${endl}${endl}\
 ${codes.imports}${endl}${endl}\
-${codes.mergedStates}${endl}${endl}\
 ${codes.exportModelStates}${endl}${endl}\
+${codes.mergedStates}${endl}${endl}\
 export interface DvaState extends MergedStates {\
 ${options.loading ? `${endl}  loading: DvaLoading;${endl}` : ''}\
 }${endl}\
@@ -79,17 +79,15 @@ ${options.loading ? `${endl}  loading: DvaLoading;${endl}` : ''}\
       .map(symbol => `import ${symbol} from '${this.api.winPath(modelSymbolMap[symbol])}';`)
       .join(endl);
 
-    const exportModelStates = `\
-export {${endl}\
-  ${modelSymbols.join(','.concat(endl, '  '))},${endl}\
-};\
-`;
+    const exportModelStates = modelSymbols
+      .map(symbol => `export type ${symbol}Type = typeof ${symbol};`)
+      .join(endl);
 
     const mergedStates = `\
 interface MergedStates${endl}\
   extends PickDvaModelState<\
-${modelSymbols.join('>,'.concat(endl, '    PickDvaModelState<'))}\
-> {}${endl}${endl}\
+${modelSymbols.join('Type>,'.concat(endl, '    PickDvaModelState<'))}\
+Type> {}${endl}${endl}\
 interface DvaLoading {${endl}\
   global: boolean;${endl}\
   effects: { [Key: string]: boolean | undefined };${endl}\
