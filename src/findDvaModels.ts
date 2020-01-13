@@ -25,11 +25,11 @@ export default async function findDvaModels(
 
   /** there are no global models */
   if (!(await fsExists(globalModelDir)) || !(await fsStat(globalModelDir)).isDirectory())
-    return (await Promise.all(pagesModelsTasks)).flat();
+    return flat(await Promise.all(pagesModelsTasks));
 
   /** find global models */
   const globalModelsTask = findTypeScriptFilesRecursively(globalModelDir);
-  return [await globalModelsTask, ...(await Promise.all(pagesModelsTasks))].flat();
+  return flat([await globalModelsTask, ...(await Promise.all(pagesModelsTasks))]);
 }
 
 async function findDvaModelsInRoute(
@@ -46,8 +46,7 @@ async function findDvaModelsInRoute(
   /** find models in sub-routes */
   if (route.routes?.length)
     tasks.push(...route.routes.map(subRoute => findDvaModelsInRoute(absSrcPath, dir, subRoute)));
-  const paths = await Promise.all(tasks);
-  return paths.flat();
+  return flat(await Promise.all(tasks));
 }
 
 async function findTypeScriptFilesRecursively(specPath: string): Promise<string[]> {
@@ -81,4 +80,10 @@ function nodeGreaterThanXX(): boolean {
   const [major, minor] = process.version.match(/(\d*)\.(\d*)\.(\d*)/).slice(1);
   if (parseInt(major) > 10) return true;
   return major === '10' && parseInt(minor) >= 10;
+}
+
+function flat<T>(array: (T | T[])[]): T[] {
+  return 'flat' in array && typeof array.flat === 'function'
+    ? array.flat()
+    : array.reduce<T[]>((prev, curr) => prev.concat(curr), []);
 }

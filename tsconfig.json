@@ -6,14 +6,13 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
-    "lib": ["esnext", "dom"],
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "suppressImplicitAnyIndexErrors": true,
-    "target": "esnext"
+    "target": "ESNext"
   }
 }

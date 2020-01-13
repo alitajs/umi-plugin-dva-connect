@@ -1,7 +1,7 @@
 {
   "name": "umi-plugin-dva-connect",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "lib/index.js",
   "types": "fixtures/index.ts",
   "typings": "fixtures/index.ts",
