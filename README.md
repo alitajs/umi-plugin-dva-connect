@@ -26,9 +26,65 @@ export default {
 };
 ```
 
+### Model
+
+#### with `as const`
+
+```ts
+const exampleModel = {
+  namespace: 'example',
+  state: {
+    count: 0,
+  },
+} as const;
+
+export default exampleModel;
+```
+
+#### with `interface`
+
+```ts
+interface ExampleModel = {
+  namespace: 'example';
+  state: {
+    count: number;
+  },
+};
+
+const exampleModel: ExampleModel = {
+  namespace: 'example',
+  state: {
+    count: 0,
+  },
+};
+
+export default exampleModel;
+```
+
+### Import from plugin
+
+```ts
+import { DvaState } from 'umi-plugin-dva-connect';
+```
+
 ## Options
 
-TODO
+```ts
+interface PluginDvaConnectOptions {
+  /**
+   * `dva-loading` enabled or not.
+   * @default
+   * true
+   */
+  loading?: boolean;
+  /**
+   * name directory in singular.
+   * @default
+   * false
+   */
+  singular?: boolean;
+}
+```
 
 ## LICENSE
 
