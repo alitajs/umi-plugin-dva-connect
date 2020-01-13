@@ -1,11 +1,22 @@
-import { basename, dirname, relative } from 'path';
+import { writeFile } from 'fs';
+import { basename, dirname, join, relative } from 'path';
 import { IApi } from 'umi-types';
+import { promisify } from 'util';
 
 import findDvaModels from './findDvaModels';
+import { types as TargetRelativePath } from '../package.json';
 import { PluginDvaConnectOptions } from './types';
 
+const fsWriteFile = promisify(writeFile);
+
 export default class DvaTypesGenerator {
-  api: IApi;
+  static TargetAbsolutePath: string = join(__dirname, '..', TargetRelativePath);
+
+  private static ModelSymbolPrefix: string = 'Model';
+
+  private static EndLine: string = process.platform === 'win32' ? '\r\n' : '\n';
+
+  private api: IApi;
 
   private paths: string[] = [];
 
@@ -24,6 +35,7 @@ export default class DvaTypesGenerator {
 
   private async createGenerateTask(options: Required<PluginDvaConnectOptions>): Promise<boolean> {
     const previousPaths = this.paths;
+    const endl = DvaTypesGenerator.EndLine;
 
     /** update models paths */
     this.paths = await findDvaModels(this.api.paths.absSrcPath, options.singular);
@@ -36,34 +48,80 @@ export default class DvaTypesGenerator {
         return false;
       }
 
-    this.generateModelsImports(); // TODO
+    const codes = this.generateTypes();
+
+    /** write types into target file */
+    if (codes) {
+      const fileContent = `\
+import { PickDvaModelState } from './utils';${endl}${endl}\
+${codes.imports}${endl}${endl}\
+${codes.mergedStates}${endl}${endl}\
+${codes.exportModelStates}${endl}${endl}\
+export interface DvaState extends MergedStates {\
+${options.loading ? `${endl}  loading: DvaLoading;${endl}` : ''}\
+}${endl}\
+`;
+      await fsWriteFile(DvaTypesGenerator.TargetAbsolutePath, fileContent, 'utf8');
+    }
 
     this.generateTask = null;
     return true;
   }
 
-  private generateModelsImports() {
-    const symbolMap = this.getModelSymbolMap();
-    return Object.entries(symbolMap)
-      .map(([symbol, path]) => `import Model${symbol} from '${path}';`)
-      .join('\r\n');
+  private generateTypes() {
+    const endl = DvaTypesGenerator.EndLine;
+    const modelSymbolMap = this.getModelSymbolMap();
+    const modelSymbols = Object.keys(modelSymbolMap);
+
+    if (!modelSymbols.length) return false;
+
+    const imports = modelSymbols
+      .map(symbol => `import ${symbol} from '${this.api.winPath(modelSymbolMap[symbol])}';`)
+      .join(endl);
+
+    const exportModelStates = `\
+export {${endl}\
+  ${modelSymbols.join(','.concat(endl, '  '))},${endl}\
+};\
+`;
+
+    const mergedStates = `\
+interface MergedStates${endl}\
+  extends PickDvaModelState<\
+${modelSymbols.join('>,'.concat(endl, '    PickDvaModelState<'))}\
+> {}${endl}${endl}\
+interface DvaLoading {${endl}\
+  global: boolean;${endl}\
+  effects: { [Key: string]: boolean | undefined };${endl}\
+  models: { [Key in keyof MergedStates]?: boolean };${endl}\
+}\
+`;
+
+    return { imports, exportModelStates, mergedStates };
   }
 
   /**
    * @returns map the symbols of model files to their absolute paths.
    */
   private getModelSymbolMap(): Record<string, string> {
-    const symbolMap: Record<string, string> = {};
-    this.paths.forEach(path => {
-      let symbol: string = '';
-      let parent: string = path;
+    const symbolMap: Record<string, string> = {
+      [DvaTypesGenerator.ModelSymbolPrefix]: 'place-holder',
+    };
 
-      while (!symbol || symbol in symbolMap) {
-        symbol = `${firstLetterToUpperCase(basename(parent))}${symbol}`;
+    this.paths.forEach(path => {
+      let parent: string = path.replace(/.ts$/, '');
+      let symbol: string = DvaTypesGenerator.ModelSymbolPrefix;
+
+      while (symbol in symbolMap) {
+        symbol = `${pascalcaseBasename(parent)}${symbol}`;
 
         /** duplicate model symbol */
         if (!relative(path, dirname(path))) {
-          symbol = firstLetterToUpperCase(randomString());
+          symbol = ''.concat(
+            DvaTypesGenerator.ModelSymbolPrefix,
+            symbol.concat(firstLetterToUpperCase(randomString())),
+          );
+
           this.api.log.warn(`\
 [PluginDvaConnect] duplicate model symbol found, replace with random symbol '${symbol}'.
     (${path})\
@@ -75,11 +133,20 @@ export default class DvaTypesGenerator {
         parent = dirname(parent);
       }
 
-      symbolMap[symbol] = path;
+      symbolMap[symbol] = path.replace(/.ts$/, '');
     });
 
+    delete symbolMap[DvaTypesGenerator.ModelSymbolPrefix];
     return symbolMap;
   }
+}
+
+function pascalcaseBasename(path: string): string {
+  return basename(path)
+    .split(/[^0-9a-zA-Z$_]/)
+    .filter(part => !!part)
+    .map(part => firstLetterToUpperCase(part))
+    .join('');
 }
 
 /**
