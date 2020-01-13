@@ -33,7 +33,7 @@ export default function pluginDvaConnect(api: IApi, initialOptions: OptionsType 
     },
     {
       specifiers: [], // TODO
-      source: 'umi-plugin-dva-connect/fixtures/index',
+      source: 'umi-plugin-dva-connect/fixtures/mock',
     },
   ]);
 }
